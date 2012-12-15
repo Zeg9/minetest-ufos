@@ -42,10 +42,8 @@ function ufo:on_step (dtime)
 		local vel = self.object:getvelocity()
 		local acc = self.object:getacceleration()
 		if ctrl.up then
-			vel.x = math.cos(self.object:getyaw()+math.pi/2)*UFO_SPEED
-			vel.z = math.sin(self.object:getyaw()+math.pi/2)*UFO_SPEED
-			acc.x = vel.x*.25
-			acc.z = vel.z*.25
+			acc.x = math.cos(self.object:getyaw()+math.pi/2)*UFO_SPEED
+			acc.z = math.sin(self.object:getyaw()+math.pi/2)*UFO_SPEED
 		else
 			acc.x = -vel.x/5
 			acc.z = -vel.z/5
