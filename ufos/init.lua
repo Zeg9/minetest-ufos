@@ -1,5 +1,5 @@
 
-local UFO_SPEED = 1
+local UFO_SPEED = 10
 local UFO_TURN_SPEED = 2
 
 local ufo = {
@@ -39,22 +39,30 @@ end
 function ufo:on_step (dtime)
 	if self.driver then
 		local ctrl = self.driver:get_player_control()
-		local vel = {x=0,y=0,z=0}
+		local vel = self.object:getvelocity()
+		local acc = self.object:getacceleration()
 		if ctrl.up then
 			vel.x = math.cos(self.object:getyaw()+math.pi/2)*UFO_SPEED
 			vel.z = math.sin(self.object:getyaw()+math.pi/2)*UFO_SPEED
+			acc.x = vel.x*.25
+			acc.z = vel.z*.25
+		else
+			acc.x = -vel.x/5
+			acc.z = -vel.z/5
 		end
 		if ctrl.down then
-			vel.x = -self.object:getvelocity().x
-			vel.z = -self.object:getvelocity().z
+			acc.x = -vel.x
+			acc.z = -vel.z
 		end
 		if ctrl.jump then
 			vel.y = UFO_SPEED
-		end
-		if ctrl.sneak then
+		elseif ctrl.sneak then
 			vel.y = -UFO_SPEED
+		else
+			acc.y = -vel.y/2
 		end
-		self.object:setacceleration(vel)
+		self.object:setvelocity(vel)
+		self.object:setacceleration(acc)
 		if ctrl.left then
 			self.object:setyaw(self.object:getyaw()+math.pi/120*UFO_TURN_SPEED)
 		end
