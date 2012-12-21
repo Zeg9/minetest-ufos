@@ -88,3 +88,12 @@ minetest.register_craftitem("ufos:ufo", {
 	end,
 })
 
+minetest.register_craft( {
+	output = 'ufos:ufo',
+	recipe = {
+		{ "", "default:glass", ""},
+		{ "default:mese_crystal_fragment", "default:stone", "default:mese_crystal_fragment"},
+		{ "default:steel_ingot", "default:mese_crystal", "default:steel_ingot"},
+	},
+})
+
