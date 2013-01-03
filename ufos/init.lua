@@ -75,8 +75,8 @@ minetest.register_entity("ufos:ufo", ufo)
 
 minetest.register_craftitem("ufos:ufo", {
 	description = "ufo",
-	inventory_image = "ufo.png",
-	wield_image = "ufo.png",
+	inventory_image = "ufo_inventory.png",
+	wield_image = "ufo_inventory.png",
 	
 	on_place = function(itemstack, placer, pointed_thing)
 		if pointed_thing.type ~= "node" then
