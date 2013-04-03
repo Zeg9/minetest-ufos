@@ -42,7 +42,6 @@ end
 ufos.ufo_from_item = function(itemstack,placer,pointed_thing)
 	-- set owner
 	ufos.next_owner = placer:get_player_name()
-	minetest.chat_send_player(placer:get_player_name(), "Your UFO has been locked, but it may unlock at any moment due to some bug. Please take it in your inventory when you leave it somewhere")
 	-- restore the fuel inside the item
 	local wear = itemstack:get_wear()
 	ufos.set_fuel(ufos.ufo,ufos.fuel_from_wear(wear))
