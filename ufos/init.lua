@@ -1,6 +1,10 @@
 
 ufos = {}
 
+local floor_pos = function(pos)
+	return {x=math.floor(pos.x),y=math.floor(pos.y),z=math.floor(pos.z)}
+end
+
 local UFO_SPEED = 1
 local UFO_TURN_SPEED = 2
 local UFO_MAX_SPEED = 10
@@ -23,13 +27,10 @@ ufos.wear_from_fuel = function(fuel)
 end
 
 ufos.get_fuel = function(self)
-	--return self.object:get_hp()
 	return self.fuel
 end
 
 ufos.set_fuel = function(self,fuel,object)
-	--[[if not object then object = self.object end
-	object:set_hp(fuel)]]
 	self.fuel = fuel
 end
 
@@ -39,6 +40,9 @@ ufos.ufo_to_item = function(self)
 end
 
 ufos.ufo_from_item = function(itemstack,placer,pointed_thing)
+	-- set owner
+	ufos.next_owner = placer:get_player_name()
+	minetest.chat_send_player(placer:get_player_name(), "Your UFO has been locked, but it may unlock at any moment due to some bug. Please take it in your inventory when you leave it somewhere")
 	-- restore the fuel inside the item
 	local wear = itemstack:get_wear()
 	ufos.set_fuel(ufos.ufo,ufos.fuel_from_wear(wear))
@@ -46,9 +50,23 @@ ufos.ufo_from_item = function(itemstack,placer,pointed_thing)
 	e = minetest.env:add_entity(pointed_thing.above, "ufos:ufo")
 	-- remove the item
 	itemstack:take_item()
+	-- reset owner for next ufo
+	ufos.next_owner = ""
+end
+
+ufos.check_owner = function(self, clicker)
+	if self.owner_name ~= "" and clicker:get_player_name() ~= self.owner_name then
+		minetest.chat_send_player(clicker:get_player_name(), "This UFO is owned by "..self.owner_name.." !")
+		return false
+	elseif self.owner_name == "" then
+		minetest.chat_send_player(clicker:get_player_name(), "This UFO is not protected, you are now its owner !")
+		self.owner_name = clicker:get_player_name()
+	end
+	return true
 end
 
 
+ufos.next_owner = ""
 ufos.ufo = {
 	physical = true,
 	collisionbox = {-1.5,-.5,-1.5, 1.5,2,1.5},
@@ -57,6 +75,7 @@ ufos.ufo = {
 	textures = {"ufo_0.png"},
 	
 	driver = nil,
+	owner_name = "",
 	v = 0,
 	fuel = 0,
 	fueli = 0
@@ -68,21 +87,35 @@ function ufos.ufo:on_rightclick (clicker)
 	if self.driver and clicker == self.driver then
 		self.driver = nil
 		clicker:set_detach()
+		-- Put UFO in a box so it can't be stolen when chunk is unloaded
+		pos = floor_pos(self.object:getpos())
+		minetest.item_place_node(ItemStack({name="ufos:box"}), clicker, {type="node",under=pos,above=pos})
+		if minetest.env:get_node(pos).name == "ufos:box" then
+			local meta = minetest.env:get_meta(pos)
+			meta:set_string("infotext","UFO box, right click to use (owned by "..self.owner_name..")")
+			meta:set_string("owner",self.owner_name)
+			meta:set_int("fuel",self.fuel)
+			self.object:remove()
+		end
 	elseif not self.driver then
-		self.driver = clicker
-		clicker:set_attach(self.object, "", {x=0,y=5,z=0}, {x=0,y=0,z=0})
+		if ufos.check_owner(self,clicker) then
+			self.driver = clicker
+			clicker:set_attach(self.object, "", {x=0,y=7.5,z=0}, {x=0,y=0,z=0})
+		end
 	end
 end
 
 function ufos.ufo:on_activate (staticdata, dtime_s)
+	self.owner_name = ufos.next_owner
 	self.object:set_armor_groups({immortal=1})
 end
 
 function ufos.ufo:on_punch (puncher, time_from_last_punch, tool_capabilities, direction)
-	self.object:remove()
 	if puncher and puncher:is_player() then
-		-- wear: save the fuel inside the itemstack
-		puncher:get_inventory():add_item("main", ufos.ufo_to_item(self))
+		if ufos.check_owner(self,puncher) then
+			puncher:get_inventory():add_item("main", ufos.ufo_to_item(self))
+			self.object:remove()
+		end
 	end
 end
 
@@ -181,6 +214,26 @@ minetest.register_craft( {
 		{ "default:mese_crystal_fragment", "", "default:mese_crystal_fragment"},
 		{ "default:steelblock", "default:mese", "default:steelblock"},
 	},
+})
+
+minetest.register_node("ufos:box", {
+	description = "UFO BOX (you hacker you!)",
+	tiles = {"ufos_box.png"},
+	on_rightclick = function(pos, node, clicker, itemstack)
+		meta = minetest.env:get_meta(pos)
+		if meta:get_string("owner") == clicker:get_player_name() then
+			-- set owner
+			ufos.next_owner = meta:get_string("owner")
+			-- restore the fuel inside the node
+			ufos.set_fuel(ufos.ufo,meta:get_int("fuel"))
+			-- add the entity
+			e = minetest.env:add_entity(pos, "ufos:ufo")
+			-- remove the node
+			minetest.env:dig_node(pos)
+			-- reset owner for next ufo
+			ufos.next_owner = ""
+		end
+	end,
 })
 
 dofile(minetest.get_modpath("ufos").."/furnace.lua")
