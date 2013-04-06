@@ -58,7 +58,7 @@ ufos.check_owner = function(self, clicker)
 		minetest.chat_send_player(clicker:get_player_name(), "This UFO is owned by "..self.owner_name.." !")
 		return false
 	elseif self.owner_name == "" then
-		minetest.chat_send_player(clicker:get_player_name(), "This UFO is not protected, you are now its owner !")
+		minetest.chat_send_player(clicker:get_player_name(), "This UFO was not protected, you are now its owner !")
 		self.owner_name = clicker:get_player_name()
 	end
 	return true
@@ -228,7 +228,7 @@ minetest.register_node("ufos:box", {
 			-- add the entity
 			e = minetest.env:add_entity(pos, "ufos:ufo")
 			-- remove the node
-			minetest.env:dig_node(pos)
+			minetest.env:remove_node(pos)
 			-- reset owner for next ufo
 			ufos.next_owner = ""
 		end
