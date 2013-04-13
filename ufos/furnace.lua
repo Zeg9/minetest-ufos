@@ -13,8 +13,8 @@ ufos.furnace_inactive_formspec =
 
 minetest.register_node("ufos:furnace", {
 	description = "UFO charging device",
-	tiles = {"ufos_furnace_top.png", "ufos_furnace_bottom.png", "ufos_furnace_side.png",
-		"ufos_furnace_side.png", "ufos_furnace_side.png", "ufos_furnace_front.png"},
+	tiles = {"default_steel_block.png", "default_steel_block.png", "default_steel_block.png",
+		"default_steel_block.png", "default_steel_block.png", "default_steel_block.png^ufos_furnace_front.png"},
 	paramtype2 = "facedir",
 	groups = {cracky=2},
 	legacy_facedir_simple = true,
@@ -38,8 +38,8 @@ minetest.register_node("ufos:furnace", {
 
 minetest.register_node("ufos:furnace_active", {
 	description = "UFO charging device",
-	tiles = {"ufos_furnace_top.png", "ufos_furnace_bottom.png", "ufos_furnace_side.png",
-		"ufos_furnace_side.png", "ufos_furnace_side.png", "ufos_furnace_front_active.png"},
+	tiles = {"default_steel_block.png", "default_steel_block.png", "default_steel_block.png",
+		"default_steel_block.png", "default_steel_block.png", "default_steel_block.png^ufos_furnace_front.png^ufos_furnace_front_active.png"},
 	paramtype2 = "facedir",
 	light_source = 8,
 	drop = "ufos:furnace",
