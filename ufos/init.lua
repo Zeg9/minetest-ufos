@@ -86,16 +86,6 @@ function ufos.ufo:on_rightclick (clicker)
 	if self.driver and clicker == self.driver then
 		self.driver = nil
 		clicker:set_detach()
-		-- Put UFO in a box so it can't be stolen when chunk is unloaded
-		pos = floor_pos(self.object:getpos())
-		minetest.item_place_node(ItemStack({name="ufos:box"}), clicker, {type="node",under=pos,above=pos})
-		if minetest.env:get_node(pos).name == "ufos:box" then
-			local meta = minetest.env:get_meta(pos)
-			meta:set_string("infotext","UFO box, right click to use (owned by "..self.owner_name..")")
-			meta:set_string("owner",self.owner_name)
-			meta:set_int("fuel",self.fuel)
-			self.object:remove()
-		end
 	elseif not self.driver then
 		if ufos.check_owner(self,clicker) then
 			self.driver = clicker
@@ -105,7 +95,16 @@ function ufos.ufo:on_rightclick (clicker)
 end
 
 function ufos.ufo:on_activate (staticdata, dtime_s)
-	self.owner_name = ufos.next_owner
+	if ufos.next_owner ~= "" then
+		self.owner_name = ufos.next_owner
+		ufos.next_owner = ""
+	else
+		local data = staticdata:split(';')
+		if data and data[1] and data[2] then
+			self.owner_name = data[1]
+			self.fuel = tonumber(data[2])
+		end
+	end
 	self.object:set_armor_groups({immortal=1})
 end
 
@@ -188,6 +187,10 @@ function ufos.ufo:on_step (dtime)
 	ufos.set_fuel(self,fuel)
 end
 
+function ufos.ufo:get_staticdata()
+	return self.owner_name..";"..tostring(self.fuel)
+end
+
 minetest.register_entity("ufos:ufo", ufos.ufo)
 
 
@@ -215,9 +218,12 @@ minetest.register_craft( {
 	},
 })
 
+
+-- ufos box kept for compatibility only
 minetest.register_node("ufos:box", {
 	description = "UFO BOX (you hacker you!)",
 	tiles = {"ufos_box.png"},
+	groups = {not_in_creative_inventory=1},
 	on_rightclick = function(pos, node, clicker, itemstack)
 		meta = minetest.env:get_meta(pos)
 		if meta:get_string("owner") == clicker:get_player_name() then
