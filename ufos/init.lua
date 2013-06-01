@@ -204,6 +204,16 @@ minetest.register_tool("ufos:ufo", {
 		if pointed_thing.type ~= "node" then
 			return
 		end
+		
+		-- Call on_rightclick if the pointed node defines it
+		if placer and not placer:get_player_control().sneak then
+			local n = minetest.get_node(pointed_thing.under)
+			local nn = n.name
+			if minetest.registered_nodes[nn] and minetest.registered_nodes[nn].on_rightclick then
+				return minetest.registered_nodes[nn].on_rightclick(pointed_thing.under, n, placer, itemstack) or itemstack
+			end
+		end
+		
 		ufos.ufo_from_item(itemstack,placer,pointed_thing)
 		return itemstack
 	end,
