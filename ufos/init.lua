@@ -1,5 +1,6 @@
 
 ufos = {}
+furnacepos = {x = 0, y = 0, z = 0}
 
 local floor_pos = function(pos)
 	return {x=math.floor(pos.x),y=math.floor(pos.y),z=math.floor(pos.z)}
@@ -9,7 +10,7 @@ local UFO_SPEED = 1
 local UFO_TURN_SPEED = 2
 local UFO_MAX_SPEED = 10
 local UFO_FUEL_USE = .01
-
+local UFO_CHARGE_RADIUS = 3
 ufos.fuel_from_wear = function(wear)
 	local fuel
 	if wear == 0 then
@@ -159,20 +160,27 @@ function ufos.ufo:on_step (dtime)
 		end
 		if ctrl.aux1 then
 			local pos = self.object:getpos()
-			local t = {{x=2,z=0},{x=-2,z=0},{x=0,z=2},{x=0,z=-2}}
-			for _, i in ipairs(t) do
-				pos.x = pos.x + i.x; pos.z = pos.z + i.z;
-				if minetest.env:get_node(pos).name == "ufos:furnace" then
-					meta = minetest.env:get_meta(pos)
-					if fuel < 100 and meta:get_int("charge") > 0 then
-						fuel = fuel + 1
-						meta:set_int("charge",meta:get_int("charge")-1)
-						meta:set_string("formspec", ufos.furnace_inactive_formspec
-							.. "label[0,0;Charge: "..meta:get_int("charge"))
-					end
-				end
-				pos.x = pos.x - i.x; pos.z = pos.z - i.z;
-			end
+			
+			for  x = - UFO_CHARGE_RADIUS, UFO_CHARGE_RADIUS, 1 do 			
+				for  y = - UFO_CHARGE_RADIUS, UFO_CHARGE_RADIUS, 1 do		 -- iterate over a 3m radius cube around the UFO
+					for  z = - UFO_CHARGE_RADIUS, UFO_CHARGE_RADIUS, 1 do
+					
+						furnacepos.x = pos.x + x
+						furnacepos.y = pos.y + y
+						furnacepos.z = pos.z + z
+						if minetest.env:get_node(furnacepos).name == "ufos:furnace" then
+							meta = minetest.env:get_meta(furnacepos)
+							if fuel < 100 and meta:get_int("charge") > 0 then
+								fuel = fuel + 1
+								meta:set_int("charge",meta:get_int("charge")-1)
+								meta:set_string("formspec", ufos.furnace_inactive_formspec
+									.. "label[0,0;Charge: "..meta:get_int("charge"))
+							end
+						end
+						
+					end -- z
+				end -- y
+			end -- x
 		end
 	end
 	
