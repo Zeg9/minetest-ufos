@@ -1,6 +1,8 @@
 
 ufos = {}
 
+local e
+
 local floor_pos = function(pos)
 	return {x=math.floor(pos.x),y=math.floor(pos.y),z=math.floor(pos.z)}
 end
