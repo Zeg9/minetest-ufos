@@ -8,6 +8,7 @@ local UFO_SPEED = 1
 local UFO_TURN_SPEED = 2
 local UFO_MAX_SPEED = 10
 local UFO_FUEL_USE = .01
+local UFO_CHARGE_RADIUS = 3
 
 ufos.fuel_from_wear = function(wear)
 	local fuel
@@ -159,18 +160,15 @@ function ufos.ufo:on_step (dtime)
 		if ctrl.aux1 then
 			local pos = self.object:getpos()
 			local t = {{x=2,z=0},{x=-2,z=0},{x=0,z=2},{x=0,z=-2}}
-			for _, i in ipairs(t) do
-				pos.x = pos.x + i.x; pos.z = pos.z + i.z;
-				if minetest.get_node(pos).name == "ufos:furnace" then
-					meta = minetest.get_meta(pos)
-					if fuel < 100 and meta:get_int("charge") > 0 then
-						fuel = fuel + 1
-						meta:set_int("charge",meta:get_int("charge")-1)
-						meta:set_string("formspec", ufos.furnace_inactive_formspec
-							.. "label[0,0;Charge: "..meta:get_int("charge"))
-					end
+			furnace_pos = minetest.find_node_near(pos, UFO_CHARGE_RADIUS, "ufos:furnace")
+			if furnace_pos then
+				meta = minetest.get_meta(furnace_pos)
+				if fuel < 100 and meta:get_int("charge") > 0 then
+					fuel = fuel + 1
+					meta:set_int("charge",meta:get_int("charge")-1)
+					meta:set_string("formspec", ufos.furnace_inactive_formspec
+						.. "label[0,0;Charge: "..meta:get_int("charge"))
 				end
-				pos.x = pos.x - i.x; pos.z = pos.z - i.z;
 			end
 		end
 	end
