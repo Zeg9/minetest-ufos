@@ -46,7 +46,7 @@ ufos.ufo_from_item = function(itemstack,placer,pointed_thing)
 	local wear = itemstack:get_wear()
 	ufos.set_fuel(ufos.ufo,ufos.fuel_from_wear(wear))
 	-- add the entity
-	e = minetest.add_entity(pointed_thing.above, "ufos:ufo")
+	local e = minetest.add_entity(pointed_thing.above, "ufos:ufo")
 	-- remove the item
 	itemstack:take_item()
 	-- reset owner for next ufo
