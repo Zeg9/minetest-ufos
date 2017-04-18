@@ -193,7 +193,8 @@ end
 minetest.register_entity("ufos:ufo", ufos.ufo)
 
 
-minetest.register_tool("ufos:ufo", {
+--register tool (with/without technic mod)
+local tooldef = {
 	description = "ufo",
 	inventory_image = "ufos_inventory.png",
 	wield_image = "ufos_inventory.png",
@@ -216,7 +217,14 @@ minetest.register_tool("ufos:ufo", {
 		ufos.ufo_from_item(itemstack,placer,pointed_thing)
 		return itemstack
 	end,
-})
+}
+
+if technic then
+        tooldef.on_refill = technic.refill_RE_charge
+        tooldef.wear_represents = "technic_RE_charge"
+        technic.register_power_tool("ufos:ufo", 2000000)
+end
+minetest.register_tool("ufos:ufo", tooldef)
 
 minetest.register_craft( {
 	output = 'ufos:ufo',
