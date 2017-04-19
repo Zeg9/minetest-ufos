@@ -1,3 +1,4 @@
+print("load ufos...")
 ufos = {}
 
 local floor_pos = function(pos)
@@ -86,6 +87,7 @@ function ufos.ufo:on_rightclick (clicker)
 	if not clicker or not clicker:is_player() then
 		return
 	end
+	print("UFO driver: ", dump(self.driver))
 	if self.driver and clicker == self.driver then
 		self.driver = nil
 		clicker:set_detach()
@@ -268,5 +270,44 @@ minetest.register_node("ufos:box", {
 
 dofile(minetest.get_modpath("ufos").."/furnace.lua")
 
+--on join attach the player to his UFO again
+minetest.register_on_joinplayer(function(player)
+	print(player:get_player_name(), " joined the game with ufos")
+	local join_pos = player:getpos()
+	minetest.after(1, function()
+	local maybe_ufo = minetest.get_objects_inside_radius(join_pos, 3)
+	for _,obj in ipairs(maybe_ufo) do
+	        print("found obj")
+		if not obj:is_player() then
+			local entity = obj:get_luaentity()
+			print(entity.name)
+			if entity.name == "ufos:ufo" then 
+			        print("found ufo")
+			        entity:on_rightclick(player)
+			end
+		end
+	end
+	end)
+end)
+
+--on leave deatach
+minetest.register_on_leaveplayer(function(player)
+	print(player:get_player_name(), " left the game with ufos")
+	local join_pos = player:getpos()
+	local maybe_ufo = minetest.get_objects_inside_radius(join_pos, 3)
+	for _,obj in ipairs(maybe_ufo) do
+	        print("found obj")
+		if not obj:is_player() then
+			local entity = obj:get_luaentity()
+			print(entity.name)
+			if entity.name == "ufos:ufo" then 
+			        print("found ufo")
+			        entity:on_rightclick(player)
+			end
+		end
+	end
+end)
+
+print("ufos loaded!")
 
 
