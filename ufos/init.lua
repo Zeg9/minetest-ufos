@@ -46,7 +46,9 @@ ufos.ufo_from_item = function(itemstack,placer,pointed_thing)
 	local wear = itemstack:get_wear()
 	ufos.set_fuel(ufos.ufo,ufos.fuel_from_wear(wear))
 	-- add the entity
-	local e = minetest.add_entity(pointed_thing.above, "ufos:ufo")
+	e = minetest.add_entity(pointed_thing.above, "ufos:ufo")
+	-- set high hp to not destroy it with guns etc
+	e:set_hp(1000000)
 	-- remove the item
 	itemstack:take_item()
 	-- reset owner for next ufo
@@ -80,7 +82,6 @@ ufos.ufo = {
 	fuel = 0,
 	fueli = 0
 }
-
 function ufos.ufo:on_rightclick (clicker)
 	if not clicker or not clicker:is_player() then
 		return
@@ -267,19 +268,5 @@ minetest.register_node("ufos:box", {
 
 dofile(minetest.get_modpath("ufos").."/furnace.lua")
 
---on join attach the player to his UFO again
-minetest.register_on_joinplayer(function(player)
-	minetest.chat_send_all(player:get_player_name().." has joined this awesome game.")
-	local join_pos = player:getpos()
-	minetest.after(1, function()
-	local maybe_ufo = minetest.get_objects_inside_radius(join_pos, 3)
-	for _,obj in ipairs(maybe_ufo) do
-		if not obj:is_player() then
-			local entity = obj:get_luaentity()
-			if entity.name == "ufos:ufo" then 
-			        entity:on_rightclick(player)
-			end
-		end
-	end
-	end)
-end)
+
+
