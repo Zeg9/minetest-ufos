@@ -72,6 +72,7 @@ ufos.ufo = {
 	visual = "mesh",
 	mesh = "ufo.x",
 	textures = {"ufo_0.png"},
+	groups = {immortal=1},
 	
 	driver = nil,
 	owner_name = "",
@@ -79,6 +80,7 @@ ufos.ufo = {
 	fuel = 0,
 	fueli = 0
 }
+
 function ufos.ufo:on_rightclick (clicker)
 	if not clicker or not clicker:is_player() then
 		return
@@ -86,6 +88,10 @@ function ufos.ufo:on_rightclick (clicker)
 	if self.driver and clicker == self.driver then
 		self.driver = nil
 		clicker:set_detach()
+		self.object:setvelocity({x=0, y=0, z=0})
+		local pos = clicker:getpos()
+		minetest.chat_send_player(clicker:get_player_name(),
+			"out of UFO at pos ".. pos.x .. ";" .. pos.y .. ";" .. pos.z)
 	elseif not self.driver then
 		if ufos.check_owner(self,clicker) then
 			self.driver = clicker
@@ -119,6 +125,7 @@ end
 
 function ufos.ufo:on_step (dtime)
 	local fuel = ufos.get_fuel(self)
+	
 	if self.driver then
 		local ctrl = self.driver:get_player_control()
 		local vel = self.object:getvelocity()
@@ -171,6 +178,8 @@ function ufos.ufo:on_step (dtime)
 				end
 			end
 		end
+	else
+	        self.object:setvelocity({x=0, y=0, z=0})
 	end
 	
 	if fuel < 0 then fuel = 0 end
@@ -257,3 +266,20 @@ minetest.register_node("ufos:box", {
 })
 
 dofile(minetest.get_modpath("ufos").."/furnace.lua")
+
+--on join attach the player to his UFO again
+minetest.register_on_joinplayer(function(player)
+	minetest.chat_send_all(player:get_player_name().." has joined this awesome game.")
+	local join_pos = player:getpos()
+	minetest.after(1, function()
+	local maybe_ufo = minetest.get_objects_inside_radius(join_pos, 3)
+	for _,obj in ipairs(maybe_ufo) do
+		if not obj:is_player() then
+			local entity = obj:get_luaentity()
+			if entity.name == "ufos:ufo" then 
+			        entity:on_rightclick(player)
+			end
+		end
+	end
+	end)
+end)
