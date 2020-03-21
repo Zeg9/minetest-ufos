@@ -21,7 +21,6 @@ minetest.register_node("ufos:furnace", {
 	paramtype2 = "facedir",
 	groups = {cracky=2},
 	legacy_facedir_simple = true,
-	sounds = default.node_sound_stone_defaults(),
 	on_construct = function(pos)
 		local meta = minetest.get_meta(pos)
 		meta:set_string("formspec", ufos.furnace_inactive_formspec)
@@ -48,7 +47,6 @@ minetest.register_node("ufos:furnace_active", {
 	drop = "ufos:furnace",
 	groups = {cracky=2, not_in_creative_inventory=1},
 	legacy_facedir_simple = true,
-	sounds = default.node_sound_stone_defaults(),
 	on_construct = function(pos)
 		local meta = minetest.get_meta(pos)
 		meta:set_string("formspec", ufos.furnace_inactive_formspec)
