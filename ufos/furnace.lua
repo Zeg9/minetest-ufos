@@ -3,6 +3,12 @@ if minetest.get_modpath("mcl_core") then
 else
    ufos.fuel = "default:obsidian_shard"
 end
+local efects=""
+if minetest.get_modpath("mcl_core") then
+   efects=mcl_sounds.node_sound_stone_defaults()
+else
+   efects=default.node_sound_stone_defaults()
+end
 ufos.fuel_time = 10
 
 ufos.furnace_inactive_formspec =
@@ -21,6 +27,7 @@ minetest.register_node("ufos:furnace", {
 	paramtype2 = "facedir",
 	groups = {cracky=2},
 	legacy_facedir_simple = true,
+	sounds = efects,
 	on_construct = function(pos)
 		local meta = minetest.get_meta(pos)
 		meta:set_string("formspec", ufos.furnace_inactive_formspec)
@@ -47,6 +54,7 @@ minetest.register_node("ufos:furnace_active", {
 	drop = "ufos:furnace",
 	groups = {cracky=2, not_in_creative_inventory=1},
 	legacy_facedir_simple = true,
+	sounds = efects,
 	on_construct = function(pos)
 		local meta = minetest.get_meta(pos)
 		meta:set_string("formspec", ufos.furnace_inactive_formspec)
