@@ -281,7 +281,7 @@ minetest.register_node("ufos:box", {
 	end,
 })
 
-dofile(minetest.get_modpath("ufos").."/furnace.lua")
+dofile(minetest.get_modpath(minetest.get_current_modname()).."/furnace.lua")
 
 --on join attach the player to his UFO again
 minetest.register_on_joinplayer(function(player)
