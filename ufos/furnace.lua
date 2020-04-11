@@ -1,5 +1,14 @@
-
-ufos.fuel = "default:obsidian_shard"
+if minetest.get_modpath("mcl_core") then
+	ufos.fuel = "mcl_core:obsidian"
+else
+   ufos.fuel = "default:obsidian_shard"
+end
+local efects=""
+if minetest.get_modpath("mcl_core") then
+   efects=mcl_sounds.node_sound_stone_defaults()
+else
+   efects=default.node_sound_stone_defaults()
+end
 ufos.fuel_time = 10
 
 ufos.furnace_inactive_formspec =
@@ -18,16 +27,16 @@ minetest.register_node("ufos:furnace", {
 	paramtype2 = "facedir",
 	groups = {cracky=2},
 	legacy_facedir_simple = true,
-	sounds = default.node_sound_stone_defaults(),
+	sounds = efects,
 	on_construct = function(pos)
-		local meta = minetest.env:get_meta(pos)
+		local meta = minetest.get_meta(pos)
 		meta:set_string("formspec", ufos.furnace_inactive_formspec)
 		meta:set_string("infotext", "UFO charging device")
 		local inv = meta:get_inventory()
 		inv:set_size("fuel", 1)
 	end,
 	can_dig = function(pos,player)
-		local meta = minetest.env:get_meta(pos);
+		local meta = minetest.get_meta(pos);
 		local inv = meta:get_inventory()
 		if not inv:is_empty("fuel") then
 			return false
@@ -45,16 +54,16 @@ minetest.register_node("ufos:furnace_active", {
 	drop = "ufos:furnace",
 	groups = {cracky=2, not_in_creative_inventory=1},
 	legacy_facedir_simple = true,
-	sounds = default.node_sound_stone_defaults(),
+	sounds = efects,
 	on_construct = function(pos)
-		local meta = minetest.env:get_meta(pos)
+		local meta = minetest.get_meta(pos)
 		meta:set_string("formspec", ufos.furnace_inactive_formspec)
 		meta:set_string("infotext", "UFO charging device")
 		local inv = meta:get_inventory()
 		inv:set_size("fuel", 1)
 	end,
 	can_dig = function(pos,player)
-		local meta = minetest.env:get_meta(pos);
+		local meta = minetest.get_meta(pos);
 		local inv = meta:get_inventory()
 		if not inv:is_empty("fuel") then
 			return false
@@ -64,16 +73,16 @@ minetest.register_node("ufos:furnace_active", {
 })
 
 function hacky_swap_node(pos,name)
-	local node = minetest.env:get_node(pos)
-	local meta = minetest.env:get_meta(pos)
+	local node = minetest.get_node(pos)
+	local meta = minetest.get_meta(pos)
 	local meta0 = meta:to_table()
 	if node.name == name then
 		return
 	end
 	node.name = name
 	local meta0 = meta:to_table()
-	minetest.env:set_node(pos,node)
-	meta = minetest.env:get_meta(pos)
+	minetest.set_node(pos,node)
+	meta = minetest.get_meta(pos)
 	meta:from_table(meta0)
 end
 
@@ -82,7 +91,7 @@ minetest.register_abm({
 	interval = .25,
 	chance = 1,
 	action = function(pos, node, active_object_count, active_object_count_wider)
-		local meta = minetest.env:get_meta(pos)
+		local meta = minetest.get_meta(pos)
 		local inv = meta:get_inventory()
 		local stack = inv:get_stack("fuel",1)
 		if stack:get_name() == ufos.fuel then
@@ -94,12 +103,22 @@ minetest.register_abm({
 	end,
 })
 
-minetest.register_craft( {
-	output = 'ufos:furnace',
-	recipe = {
-		{ "default:steel_ingot", "default:obsidian", "default:steel_ingot"},
-		{ "default:obsidian", "default:furnace", "default:obsidian"},
-		{ "default:steel_ingot", "default:obsidian", "default:steel_ingot"},
-	},
-})
-
+if minetest.get_modpath("mcl_core") then
+	minetest.register_craft({
+		output = "ufos:furnace",
+		recipe = {
+			{"mcl_core:iron_nugget", "mcl_core:obsidian","mcl_core:iron_nugget"},
+			{"mcl_core:obsidian", "mesecons:redstone","mcl_core:obsidian"},
+			{"mcl_core:iron_nugget", "mcl_core:obsidian","mcl_core:iron_nugget"}
+		 },
+	})
+else
+    minetest.register_craft( {
+        output = 'ufos:furnace',
+        recipe = {
+            { "default:steel_ingot", "default:obsidian", "default:steel_ingot"},
+            { "default:obsidian", "default:furnace", "default:obsidian"},
+            { "default:steel_ingot", "default:obsidian", "default:steel_ingot"},
+        },
+    })
+end

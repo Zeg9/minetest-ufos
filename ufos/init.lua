@@ -1,6 +1,5 @@
-
 ufos = {}
-
+local e
 local floor_pos = function(pos)
 	return {x=math.floor(pos.x),y=math.floor(pos.y),z=math.floor(pos.z)}
 end
@@ -219,14 +218,25 @@ minetest.register_tool("ufos:ufo", {
 	end,
 })
 
-minetest.register_craft( {
-	output = 'ufos:ufo',
-	recipe = {
-		{ "", "default:glass", ""},
-		{ "default:mese_crystal_fragment", "", "default:mese_crystal_fragment"},
-		{ "default:steelblock", "default:mese", "default:steelblock"},
-	},
-})
+if minetest.get_modpath("mcl_core") then
+	minetest.register_craft({
+		output = "ufos:ufo",
+		recipe = {
+			{"", "mcl_core:glass",""},
+			{"mcl_core:iron_nugget", "","mcl_core:iron_nugget"},
+			{"mcl_core:ironblock", "mesecons:redstone","mcl_core:ironblock"}
+		 },
+	})
+else
+    minetest.register_craft( {
+        output = 'ufos:ufo',
+        recipe = {
+            { "", "default:glass", ""},
+            { "default:mese_crystal_fragment", "", "default:mese_crystal_fragment"},
+            { "default:steelblock", "default:mese", "default:steelblock"},
+        },
+    })
+end
 
 
 -- ufos box kept for compatibility only
@@ -251,5 +261,4 @@ minetest.register_node("ufos:box", {
 	end,
 })
 
-dofile(minetest.get_modpath("ufos").."/furnace.lua")
-
+dofile(minetest.get_modpath(minetest.get_current_modname()).."/furnace.lua")
